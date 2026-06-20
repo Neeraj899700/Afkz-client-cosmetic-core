@@ -9,7 +9,6 @@
     ],
     "contact": {},
     "license": "MIT",
-    "icon": "assets/afkz-client-cosmetic-core/icon.png",
     "environment": "client",
     "entrypoints": {
         "client": [
@@ -20,8 +19,7 @@
         "afkz-client-cosmetic-core.client.json"
     ],
     "depends": {
-        "fabricloader": ">=0.19.3",
-        "fabric-api": "*",
+        "fabricloader": ">=0.18.0",
         "minecraft": "26.1.2",
         "java": ">=25"
     }
