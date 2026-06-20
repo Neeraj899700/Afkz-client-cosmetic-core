@@ -12,14 +12,41 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.lang.reflect.Method;
+
 @Mixin(TitleScreen.class)
 public class TitleScreenMixin {
+
+    private static Method addRenderableWidgetMethod;
+
+    static {
+        try {
+            for (Method m : Screen.class.getDeclaredMethods()) {
+                if (m.getName().equals("addRenderableWidget") && m.getParameterCount() == 1) {
+                    addRenderableWidgetMethod = m;
+                    addRenderableWidgetMethod.setAccessible(true);
+                    AfkzClientCosmeticCore.LOGGER.info("[Afkz] Found addRenderableWidget via reflection");
+                    break;
+                }
+            }
+            if (addRenderableWidgetMethod == null) {
+                AfkzClientCosmeticCore.LOGGER.warn("[Afkz] addRenderableWidget not found, trying alternatives...");
+                for (Method m : Screen.class.getDeclaredMethods()) {
+                    if (m.getName().contains("Widget") || m.getName().contains("widget")) {
+                        AfkzClientCosmeticCore.LOGGER.info("[Afkz] Found method: {} -> {}", m.getName(), m.getReturnType());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            AfkzClientCosmeticCore.LOGGER.error("[Afkz] Reflection setup failed", e);
+        }
+    }
+
     @Inject(method = "init", at = @At("TAIL"))
     private void afkz_addCosmeticsButton(CallbackInfo ci) {
         AfkzClientCosmeticCore.LOGGER.info("[Afkz] TitleScreen mixin fired!");
         try {
             TitleScreen self = (TitleScreen) (Object) this;
-            ScreenAccessor accessor = (ScreenAccessor) self;
             Minecraft mc = Minecraft.getInstance();
             int x = self.width / 2 - 100;
             int y = self.height / 2 + 24;
@@ -32,9 +59,13 @@ public class TitleScreenMixin {
                     mc.setScreen(new CosmeticScreen());
                 }
             ).bounds(x, y, 200, 20).build();
-            accessor.callAddRenderableWidget(btn);
 
-            AfkzClientCosmeticCore.LOGGER.info("[Afkz] Button added!");
+            if (addRenderableWidgetMethod != null) {
+                addRenderableWidgetMethod.invoke(self, btn);
+                AfkzClientCosmeticCore.LOGGER.info("[Afkz] Button added via reflection!");
+            } else {
+                AfkzClientCosmeticCore.LOGGER.error("[Afkz] Cannot add button - method not found");
+            }
         } catch (Exception e) {
             AfkzClientCosmeticCore.LOGGER.error("[Afkz] Failed to add button!", e);
         }
