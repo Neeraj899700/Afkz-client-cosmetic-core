@@ -4,7 +4,8 @@
     "package": "dev.afkz.mixin",
     "compatibilityLevel": "JAVA_25",
     "client": [
-        "TitleScreenMixin"
+        "TitleScreenMixin",
+        "ScreenAccessor"
     ],
     "injectors": {
         "defaultRequire": 1
