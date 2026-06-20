@@ -1,5 +1,6 @@
 package dev.afkz.mixin;
 
+import dev.afkz.AfkzClientCosmeticCore;
 import dev.afkz.screen.CosmeticScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -22,10 +23,12 @@ public abstract class TitleScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void afkz_addCosmeticsButton(CallbackInfo ci) {
+        AfkzClientCosmeticCore.LOGGER.info("[Afkz] TitleScreen init detected! Adding Cosmetics button...");
         Button btn = Button.builder(
             Component.literal("Cosmetics"),
             b -> this.minecraft.setScreen(new CosmeticScreen())
-        ).bounds(this.width / 2 - 100, this.height / 2 + 24, 200, 20).build();
+        ).bounds(this.width / 2 - 100, this.height / 2 - 100, 200, 20).build();
         this.addRenderableWidget(btn);
+        AfkzClientCosmeticCore.LOGGER.info("[Afkz] Cosmetics button added at y={}", this.height / 2 - 100);
     }
 }
