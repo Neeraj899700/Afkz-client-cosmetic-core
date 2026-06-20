@@ -15,6 +15,7 @@ repositories {
 }
 
 loom {
+    accessWidenerPath = file("src/main/resources/afkz-client-cosmetic-core.classtweaker")
 }
 
 dependencies {
