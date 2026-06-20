@@ -10,7 +10,6 @@ public class AfkzClientCosmeticCore implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info("[Afkz Client Cosmetic Core] Initializing...");
-        LOGGER.info("[Afkz Client Cosmetic Core] Loaded successfully!");
+        LOGGER.info("[Afkz] Client Cosmetic Core loaded");
     }
 }
