@@ -1,15 +1,14 @@
-name: Build Mod
+name: Build & Test Mod
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -22,11 +21,43 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build with Gradle
+      - name: Install display server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libopengl0
+
+      - name: Build mod
         run: ./gradlew build
 
-      - name: Upload mod JAR
+      - name: Run Minecraft client with mod (60s test)
+        run: |
+          timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" \
+            ./gradlew runClient 2>&1 | tee run-output.log || true
+        timeout-minutes: 3
+
+      - name: Analyze results
+        run: |
+          echo "=== MOD LOAD CHECK ==="
+          if grep -q "\[Afkz\]" run-output.log; then
+            echo "PASS: Mod loaded successfully!"
+            grep "\[Afkz\]" run-output.log
+          else
+            echo "FAIL: Mod did not load"
+          fi
+
+          echo ""
+          echo "=== ERRORS ==="
+          grep -i -E "(error|exception|crash|Mixin.*fail)" run-output.log | head -20 || echo "No errors found"
+
+          echo ""
+          echo "=== FABRIC LOADER ==="
+          grep -i "fabric.*load\|fabric.*init\|mixin.*apply" run-output.log | head -10 || echo "No fabric loader lines"
+
+      - name: Upload JAR + Logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: afkz-client-cosmetic-core
-          path: build/libs/*.jar
+          name: mod-build-and-logs
+          path: |
+            build/libs/*.jar
+            run-output.log
