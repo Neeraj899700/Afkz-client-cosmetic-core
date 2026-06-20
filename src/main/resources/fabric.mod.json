@@ -16,10 +16,6 @@
             "dev.afkz.AfkzClientCosmeticCore"
         ]
     },
-    "mixins": [
-        "afkz-client-cosmetic-core.client.json"
-    ],
-    "accessWidener": "afkz-client-cosmetic-core.classtweaker",
     "depends": {
         "fabricloader": ">=0.19.3",
         "fabric-api": "*",
